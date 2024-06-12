@@ -1,0 +1,91 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+const env = require('../config/env.config');
+const app = require('../app');
+const http = require('http');
+const { logger, common } = require('../helpers');
+
+/**
+ * Get port from environment and store in Express.
+ */
+
+const port = normalizePort(env.PORT);
+app.set('port', port);
+
+/**
+ * Create HTTP server.
+ */
+
+const server = http.createServer(app);
+
+/**
+ * Listen on provided port, on all network interfaces.
+ */
+
+server.listen(port);
+server.on('error', onError);
+server.on('listening', onListening);
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+    const port = parseInt(val, 10);
+
+    if (isNaN(port)) {
+        // named pipe
+        return val;
+    }
+
+    if (port >= 0) {
+        // port number
+        return port;
+    }
+
+    return false;
+}
+
+/**
+ * Event listener for HTTP server 'error' event.
+ */
+
+function onError(error) {
+    if (error.syscall !== 'listen') {
+        throw error;
+    }
+
+    const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
+
+    switch (error.code) {
+        case 'EACCES':
+            logger.error(bind + ' requires elevated privileges');
+            process.exit(1);
+        case 'EADDRINUSE':
+            logger.error(bind + ' is already in use');
+            logger.warn(`
+      ** MAKE SURE TO NOT KILL ANY IMPORTANT PROCESS
+      COMMANDS TO KILL PROCESS RUNNING ON PORT ${port}:
+        LINUX/MAC: 'sudo kill -9 $(sudo lsof -t -i:${port})'
+        WINDOWS: 'taskkill /F /PID ${port}'
+    `);
+            process.exit(1);
+        default:
+            throw error;
+    }
+}
+
+/**
+ * Event listener for HTTP server 'listening' event.
+ */
+
+async function onListening() {
+    logger.info(
+        `✔ SERVER LOADED, API END POINT 'http://${common.getLocalIP()}:${server.address().port}${
+            env.API_BASE_URL
+        }/', VIEWS END POINT 'http://${common.getLocalIP()}:${server.address().port}${env.VIEWS_BASE_URL}/'`
+    );
+}
