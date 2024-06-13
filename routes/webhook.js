@@ -1,10 +1,8 @@
-// const express = require('express');
-// const {
-//     webhook: { controller },
-// } = require('../controllers');
+const express = require('express');
+const { webhook } = require('../controllers/webhook');
 
-// const router = express.Router();
-// router.get('/', controller.webhook);
-// // router.get('/avatars', controller.get);
+const router = express.Router();
+router.post('/', webhook);
+// router.get('/avatars', controller.get);
 
-// module.exports = router;
+module.exports = router;
